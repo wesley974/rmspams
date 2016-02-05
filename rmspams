@@ -1,0 +1,156 @@
+#!/bin/sh
+#
+# $ rmspams.sh for OpenBSD,v 1.5 2016/02/05 milo974 Exp $
+#
+# Copyright (c) 2016 Wesley MOUEDINE ASSABY <milo974@gmail.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+START_DIR="/var/mailserv/mail/"
+END_DIR="/.Spam/cur"
+PF_TABLE="blacksmtp"
+PF_FILE="/etc/blacksmtp"
+WHITE_FILE="/etc/whitesmtp" # We trust
+TMP_FILE="/tmp/rmspams$RANDOM.tmp"
+
+usage() {
+echo "!!! ${@}"
+echo "Usage: ${0##*/} name@domain.ext" >&2
+exit 1
+}
+
+whatodo() {
+DET=0 # Variable de detection
+echo "$i = $SCAN -- Remaining : $NBTMP"
+while read MX ; do
+
+	echo $SCAN | grep "$MX$" > /dev/null 2>&1
+	if [ "$?" == 0 ]; then
+		echo "-- Find domain $MX! Next!"
+		DET=1
+	fi
+done < $WHITE_FILE
+
+if [ $DET == 0 ]; then
+	echo "Add this IP to blacklist ? \c"
+	read WHAT < /dev/tty
+	if [ "$WHAT" == "q" ]; then
+		rm -f /tmp/rmspams* 2> /dev/null
+		exit 0
+	fi
+
+	if [ "$WHAT" != "y" ] && [ "$WHAT" != "n" ]; then
+	echo "Please, answer by 'y'(for yes) or 'n'(for no) and 'q' to quit"
+	whatodo
+	fi
+
+	if [ "$WHAT" == "y" ]; then
+		grep $i $PF_FILE > /dev/null 2>&1
+		if [ "$?" == 1 ]; then
+		echo $i >> $PF_FILE
+		/sbin/pfctl -t $PF_TABLE -T add $i
+			else
+			echo "Already added."
+		fi
+	fi
+fi
+}
+
+clearspams() {
+	rm -f /tmp/rmspams* 2> /dev/null
+	rm -f $FULL_DIR/* 2> /dev/null
+	[ "$(find $FULL_DIR -mindepth 1)" ] || echo "The spams has been removed."
+	echo "Now, Blacklist contains $(cat $PF_FILE | wc -l) IP.\n"
+	exit 0
+}
+
+# TESTS
+
+/sbin/pfctl -s Tables | grep "$PF_TABLE" > /dev/null 2>&1
+
+if [ "$?" != 0 ]; then
+	usage "The table $PF_TABLE doesn't exist."
+fi
+
+if [ ! -f "$PF_FILE" ]; then
+	usage "The file $PF_FILE doesn't exist."
+fi
+
+if [ ! -f "$WHITE_FILE" ]; then
+	usage "The file $WHITE_FILE doesn't exist."
+fi
+
+if [ "$#" -gt "1" ];then
+	usage "Too arguments."
+fi 
+
+if [ "$#" == 0 ]; then
+	usage "Need a minimum."
+fi
+
+echo $1 | grep '^[a-zA-Z0-9._%+-]*@[a-zA-Z0-9]*[\.[a-zA-Z0-9]*]*[a-zA-Z0-9]$' > /dev/null 2>&1
+if [ "$?" != 0 ]; then
+	usage "Bad recipient."
+fi
+
+FULL_DIR=$START_DIR$(echo $1 | awk -F "@" '{print $2}')"/"$(echo $1 |awk -F "@" '{print $1}')$END_DIR
+NBT=$(/sbin/pfctl -t$PF_TABLE -Tshow | wc -l)
+NBF=$(cat $PF_FILE | wc -l)
+
+
+if [ "$NBF" != "$NBT" ]; then
+	usage "Inconsistency between TABLE and FILE (PF)!"
+fi
+
+if [ -d "$FULL_DIR" ]; then
+	echo "The working directory : \c"$FULL_DIR"\n\n"
+	else
+	usage "The folder $FULL_DIR doesn't exist!"
+fi
+
+
+[ "$(find $FULL_DIR -mindepth 1)" ] || usage "No spams!"
+
+# START
+
+echo "Before, Blacklist contains $NBT IP.\n"
+
+touch $TMP_FILE
+touch $TMP_FILE.list
+
+for f in $FULL_DIR/* ; do
+	grep "^Received: from" $f| perl -lne 'print $& if /(\d+\.){3}\d+/' | xargs -I IP echo IP >> $TMP_FILE 
+done
+
+cat $TMP_FILE | sort | uniq > $TMP_FILE.list
+NBTMP=$(cat $TMP_FILE.list | wc -l)
+echo "Total IP found : $NBTMP\n"
+
+while read i; do
+	SCAN=$(nslookup -query=a $i | \
+	grep -v canonical | grep name | awk '{print $4}')
+
+	if [ -z "$SCAN" ]; then
+		NBTMP=$(expr $NBTMP - 1)
+		SCAN="unknown."
+		echo "-- $SCAN!" 
+	fi 
+
+	if [ "$SCAN" != "localhost." ] && [ "$SCAN" != "unknown." ]; then
+		NBTMP=$(expr $NBTMP - 1)
+		whatodo
+	fi
+
+done < $TMP_FILE.list
+
+clearspams
