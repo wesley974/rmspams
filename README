@@ -1,2 +1,4 @@
 Block spammers IP addresses on your mailserver.
 The only thing you need is Packet-Filter.
+
+<pre><code>Run install.sh</code></pre>
