@@ -1,5 +1,5 @@
 #!/bin/sh
-mv lists/* /etc
-mv pf.conf /etc
+install -m 600 lists/* /etc
+install -m 600 pf.conf /etc
 /usr/sbin/pfctl -f /etc/pf.conf
-mv rmspams /usr/local/sbin
+install -m 600 rmspams /usr/local/sbin
