@@ -9,5 +9,5 @@ The only thing you need is Packet-Filter.</p>
 <pre><code>Just run ./install.sh</code></pre>
 </body>
 <b>Usage</b>
-<pre><code>rmspams your.address@ema.il</code></pre>
+<pre><code>rmspams email@addr.ess</code></pre>
 </html>
