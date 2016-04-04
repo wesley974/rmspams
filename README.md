@@ -7,7 +7,7 @@ The only thing you need is Packet-Filter.</p>
 <body>
 <b>Installation</b>
 <pre><code>Just run ./install.sh</code></pre>
-</body>
 <b>Usage</b>
 <pre><code>rmspams email@addr.ess</code></pre>
+</body>
 </html>
