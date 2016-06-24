@@ -76,6 +76,11 @@ clearspams() {
 
 # TESTS
 
+UID=$(id -u)
+if [ "$UID" != 0 ]; then
+	usage "This program can run only as root."
+fi
+
 /sbin/pfctl -s Tables | grep "$PF_TABLE" > /dev/null 2>&1
 
 if [ "$?" != 0 ]; then
