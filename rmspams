@@ -129,7 +129,7 @@ touch $TMP_FILE
 touch $TMP_FILE.list
 
 for f in $FULL_DIR/* ; do
-	grep "^Received: from" $f| perl -lne 'print $& if /(\d+\.){3}\d+/' | xargs -I IP echo IP >> $TMP_FILE 
+	grep "^Received: from" $f| perl -lne 'print $& if /(\d+\.){3}\d+/' | xargs -I IP echo IP | grep -vE '(^127\.0\.0\.1)|(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])' >> $TMP_FILE
 done
 
 cat $TMP_FILE | sort | uniq > $TMP_FILE.list
