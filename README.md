@@ -8,6 +8,6 @@ The only thing you need is Packet-Filter.</p>
 <b>Installation</b>
 <pre><code>Just run ./install.sh</code></pre>
 <b>Usage</b>
-<pre><code>rmspams email@addr.ess</code></pre>
+<pre><code>rmspams email</code></pre>
 </body>
 </html>
