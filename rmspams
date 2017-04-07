@@ -29,7 +29,7 @@ MAIL_PATH="/var/mailserver/mail"
 PF_TABLE="blacksmtp"
 PF_TABLE_FILE="/etc/blacksmtp"
 
-WHITE_LIST="/etc/whitelist"
+WHITE_LIST="/etc/whitesmtp"
 
 ########################################################################
 ## End of user defined variables                                     ##
