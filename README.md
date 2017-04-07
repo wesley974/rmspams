@@ -10,4 +10,14 @@ The only thing you need is Packet-Filter.</p>
 <b>Usage</b>
 <pre><code>rmspams email</code></pre>
 </body>
+<footer>
+<b>TODO</b>
+<ul>
+<li>Implement [-i] option for interactive</li>
+<li>Implement [-u] default option for unattended running (like a cron job)</li>
+<li>Move files whitesmtp, blacksmtp, rmspams.conf in /etc/rmspams ??</li>
+<li>Make man page for rmspams(8), and rmspams.conf(5)</li>
+<li>Build a Makefile to port the project into OpenBSD</li>
+</ul>
+</footer>
 </html>
