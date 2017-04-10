@@ -104,8 +104,10 @@ build_full_dir()
 
 fetch_ip()
 {
-  _IP=$(grep "^Received: from" "${1}"| perl -lne 'print $& if /(\d+\.){3}\d+/' | xargs -I IP echo IP | \
-  	grep -vE '(^127\.0\.0\.1)|(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])')
+  _IP=$(grep "^Received: from" "${1}"| sed 's/.*\[//; s/].*//' | \
+    grep -vE '(^127\.0\.0\.1)|(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)')
+
+  echo "${_IP}"
   _REST=$((_REST-1))
 }
 
@@ -154,7 +156,7 @@ check_blacksmtp()
 your_choice()
 {
   echo "Add this IP to blacklist ? (y|n or q to exit) \c"
-  read -r _ans
+  read -r _ans < /dev/tty
   [[ "${_ans}" == "q" ]] && exit 0
   [[ "${_ans}" != "y" && "${_ans}" != "n" ]] && your_choice
   [[ "${_ans}" == "y" ]] && add_and_load_to_pf
