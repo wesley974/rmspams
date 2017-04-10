@@ -32,7 +32,7 @@ PF_TABLE_FILE="/etc/blacksmtp"
 WHITE_LIST="/etc/whitesmtp"
 
 ########################################################################
-## End of user defined variables                                     ##
+## End of user defined variables                                      ##
 ########################################################################
 
 rs_err()
@@ -40,7 +40,7 @@ rs_err()
   echo "${1}" 1>&2 && return "${2:-1}"
 }
 
-usage() 
+usage()
 {
   rs_err "Usage: ${0##*/} email"
 }
@@ -50,6 +50,7 @@ pf_check()
   (! /sbin/pfctl -s Tables | grep -q "${PF_TABLE}") && rs_err "${PF_TABLE} table doesn't exist"
 
   local _nbf _nbt
+
   _nbf=$( (wc -l) < ${PF_TABLE_FILE} )
   _nbt=$(/sbin/pfctl -t${PF_TABLE} -Tshow | wc -l)
 
@@ -68,10 +69,13 @@ syntax_check()
 
 fs_check()
 {
-  local _config=/etc/rmspams.conf _files="${_config} ${WHITE_LIST} ${PF_TABLE_FILE}" 
+  local _config _files
+
+  _config=/etc/rmspams.conf
+  _files="${_config} ${WHITE_LIST} ${PF_TABLE_FILE}"
 
   for _file in ${_files}; do
-    if [ -f "${_file}" ]; then 
+    if [ -f "${_file}" ]; then
       if [ "$(stat -f "%SMp%SLp" "${_file}")" != "------" ]; then
         echo "Unsecure permissions on ${_file}; please run:"
         rs_err "doas chmod 0600 ${_file}"
@@ -83,10 +87,19 @@ fs_check()
 
   # shellcheck source=/dev/null
   [[ -f ${_config} ]] && . "${_config}"
+}
 
-  _FULL_DIR=${MAIL_PATH}/$(echo "${_EMAIL}" | awk -F "@" '{print $2}')/$(echo "${_EMAIL}" |awk -F "@" '{print $1}')"/.Spam/cur"
+build_full_dir()
+{
+  local _domainf _userf _spamf
+
+	_domainf=${_EMAIL#*@}
+	_userf=${_EMAIL%@*}
+	_spamf=".Spam/cur"
+  _FULL_DIR="${MAIL_PATH}/${_domainf}/${_userf}/${_spamf}"
+
   [[ ! -d "${_FULL_DIR}" ]] && rs_err "${_FULL_DIR} doesn't exist"
-  [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
+    [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
 }
 
 fetch_ip()
@@ -100,6 +113,7 @@ lookup_ip()
 {
   _NAME=$(nslookup -query=a "$1" | \
         grep -v canonical | grep name | awk '{print $4}')
+
   [[ -z ${_NAME} ]] && _NAME='unknown.'
   [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]] && check_white_list
 }
@@ -107,6 +121,7 @@ lookup_ip()
 check_white_list()
 {
   local _whitedns
+
   echo "${_IP} = ${_NAME} -- Remaining : ${_REST}"
 
   if [ ! -s ${WHITE_LIST} ]; then
@@ -150,6 +165,7 @@ _EMAIL=$1
 
 syntax_check
 fs_check
+build_full_dir
 pf_check
 
 _REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
