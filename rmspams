@@ -37,7 +37,7 @@ WHITE_LIST="/etc/whitesmtp"
 
 rs_err()
 {
-  echo "${1}" 1>&2 && return ${2:-1}
+  echo "${1}" 1>&2 && return "${2:-1}"
 }
 
 usage() 
@@ -49,7 +49,10 @@ pf_check()
 {
   (! /sbin/pfctl -s Tables | grep -q "${PF_TABLE}") && rs_err "${PF_TABLE} table doesn't exist"
 
-  local _nbf=$( (wc -l) < ${PF_TABLE_FILE} ) _nbt=$(/sbin/pfctl -t${PF_TABLE} -Tshow | wc -l)
+  local _nbf _nbt
+  _nbf=$( (wc -l) < ${PF_TABLE_FILE} )
+  _nbt=$(/sbin/pfctl -t${PF_TABLE} -Tshow | wc -l)
+
   (("${_nbf}" != "${_nbt}"))&& rs_err "Inconsistency between table and file"
 }
 
@@ -57,7 +60,7 @@ syntax_check()
 {
   [[ ${_NARG} == 0 || ${_NARG} -gt 1 ]] && usage
 
-  (! echo ${_EMAIL} | grep -q '^[a-zA-Z0-9._%+-]*@[a-zA-Z0-9]*[\.[a-zA-Z0-9-]*]*[a-zA-Z0-9]$') \
+  (! echo "${_EMAIL}" | grep -q '^[a-zA-Z0-9._%+-]*@[a-zA-Z0-9]*[\.[a-zA-Z0-9-]*]*[a-zA-Z0-9]$') \
     && rs_err "${0##*/}: bad recipient address"
 
   (($(id -u) != 0)) && rs_err "${0##*/}: need root privileges"
@@ -68,8 +71,8 @@ fs_check()
   local _config=/etc/rmspams.conf _files="${_config} ${WHITE_LIST} ${PF_TABLE_FILE}" 
 
   for _file in ${_files}; do
-    if [ -f ${_file} ]; then 
-      if [ "$(stat -f "%SMp%SLp" ${_file})" != "------" ]; then
+    if [ -f "${_file}" ]; then 
+      if [ "$(stat -f "%SMp%SLp" "${_file}")" != "------" ]; then
         echo "Unsecure permissions on ${_file}; please run:"
         rs_err "doas chmod 0600 ${_file}"
       fi
@@ -81,21 +84,21 @@ fs_check()
   # shellcheck source=/dev/null
   [[ -f ${_config} ]] && . "${_config}"
 
-  _FULL_DIR=${MAIL_PATH}/$(echo ${_EMAIL} | awk -F "@" '{print $2}')/$(echo ${_EMAIL} |awk -F "@" '{print $1}')"/.Spam/cur"
+  _FULL_DIR=${MAIL_PATH}/$(echo "${_EMAIL}" | awk -F "@" '{print $2}')/$(echo "${_EMAIL}" |awk -F "@" '{print $1}')"/.Spam/cur"
   [[ ! -d "${_FULL_DIR}" ]] && rs_err "${_FULL_DIR} doesn't exist"
-  [ "$(find ${_FULL_DIR} -mindepth 1)" ] || exit 0
+  [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
 }
 
 fetch_ip()
 {
-  _IP=$(grep "^Received: from" ${1}| perl -lne 'print $& if /(\d+\.){3}\d+/' | xargs -I IP echo IP | \
+  _IP=$(grep "^Received: from" "${1}"| perl -lne 'print $& if /(\d+\.){3}\d+/' | xargs -I IP echo IP | \
   	grep -vE '(^127\.0\.0\.1)|(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])')
   _REST=$((_REST-1))
 }
 
 lookup_ip()
 {
-  _NAME=$(nslookup -query=a $1 | \
+  _NAME=$(nslookup -query=a "$1" | \
         grep -v canonical | grep name | awk '{print $4}')
   [[ -z ${_NAME} ]] && _NAME='unknown.'
   [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]] && check_white_list
@@ -107,26 +110,26 @@ check_white_list()
   echo "${_IP} = ${_NAME} -- Remaining : ${_REST}"
 
   if [ ! -s ${WHITE_LIST} ]; then
-    (grep -q ^${_IP}$ ${PF_TABLE_FILE}) && rm -f ${_F}
-    (! grep -q ^${_IP}$ ${PF_TABLE_FILE}) && your_choice
+    (grep -q ^"${_IP}"$ ${PF_TABLE_FILE}) && rm -f "${_F}"
+    (! grep -q ^"${_IP}"$ ${PF_TABLE_FILE}) && your_choice
   else
-    while read _whitedns ; do
+    while read -r _whitedns ; do
       (! echo ${_NAME} | grep -q "${_whitedns}$") && check_blacksmtp
-      (echo ${_NAME} | grep -q "${_whitedns}$") && rm -f ${_F}
+      (echo ${_NAME} | grep -q "${_whitedns}$") && rm -f "${_F}"
     done < ${WHITE_LIST}
   fi
 }
 
 add_and_load_to_pf()
 {
-  echo ${_IP} >> ${PF_TABLE_FILE}
-  /sbin/pfctl -t ${PF_TABLE} -T add ${_IP}
-  rm -f ${_F}
+  echo "${_IP}" >> ${PF_TABLE_FILE}
+  /sbin/pfctl -t ${PF_TABLE} -T add "${_IP}"
+  rm -f "${_F}"
 }
 
 check_blacksmtp()
 {
-  if (! grep -q ^${_IP}$ ${PF_TABLE_FILE}); then
+  if (! grep -q ^"${_IP}"$ ${PF_TABLE_FILE}); then
     add_and_load_to_pf
   else
     your_choice
@@ -136,24 +139,24 @@ check_blacksmtp()
 your_choice()
 {
   echo "Add this IP to blacklist ? (y|n or q to exit) \c"
-  read _ans < /dev/tty
+  read -r _ans
   [[ "${_ans}" == "q" ]] && exit 0
   [[ "${_ans}" != "y" && "${_ans}" != "n" ]] && your_choice
   [[ "${_ans}" == "y" ]] && add_and_load_to_pf
 }
 
-_NARG=${#}
-_EMAIL=${1}
+_NARG=$#
+_EMAIL=$1
 
 syntax_check
 fs_check
 pf_check
 
-_REST=$(find ${_FULL_DIR} -maxdepth 1 -type f | wc -l)
+_REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
 
 for _F in ${_FULL_DIR}/* ; do
-  fetch_ip ${_F}
-  lookup_ip ${_IP}
+  fetch_ip "${_F}"
+  lookup_ip "${_IP}"
 done
 
 exit 0
