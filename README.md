@@ -13,8 +13,6 @@ The only thing you need is Packet-Filter.</p>
 <footer>
 <b>TODO</b>
 <ul>
-<li>Implement [-d] option for debugging</li>
-<li>Implement [-i] option for interactive</li>
 <li>Move files whitesmtp, blacksmtp, rmspams.conf in /etc/rmspams ??</li>
 <li>Make man page for rmspams(8), and rmspams.conf(5)</li>
 <li>Build a Makefile to port the project into OpenBSD</li>
