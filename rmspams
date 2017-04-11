@@ -158,6 +158,7 @@ your_choice()
   [[ "${_ans}" == "q" ]] && exit 0
   [[ "${_ans}" != "y" && "${_ans}" != "n" ]] && your_choice
   [[ "${_ans}" == "y" ]] && add_and_load_to_pf
+  [[ "${_ans}" == "n" ]] && rm -f "${_F}"
 }
 
 _NARG=$#
