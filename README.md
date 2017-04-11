@@ -21,5 +21,7 @@ The only thing you need is Packet-Filter.</p>
 <li>Make man page for rmspams(8), and rmspams.conf(5)</li>
 <li>Build a Makefile to port the project into OpenBSD</li>
 </ul>
+
+If you like the project and if you wish updates, support it adding a star (★).
 </footer>
 </html>
