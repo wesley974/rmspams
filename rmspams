@@ -42,7 +42,7 @@ usage()
   rs_err "Usage: ${0##*/} [-i] [-d] email"
 }
 
-fs_check()
+checkfs()
 {
   local _files
 
@@ -60,7 +60,7 @@ fs_check()
   done
 }
 
-pf_check()
+checkpf()
 {
   (! /sbin/pfctl -s Tables | grep -q "${PF_TABLE}") && rs_err "${PF_TABLE} table doesn't exist"
 
@@ -83,10 +83,10 @@ build_full_dir()
   _FULL_DIR="${MAIL_PATH}/${_domainf}/${_userf}/${_spamf}"
 
   [[ ! -d "${_FULL_DIR}" ]] && rs_err "${_FULL_DIR} doesn't exist"
-    [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
+  [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
 }
 
-fetch_ip()
+fetchip()
 {
   _IP=$(grep "^Received: from" "${1}"| sed 's/.*\[//; s/].*//' | \
     grep -vE '(^127\.0\.0\.1)|(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)')
@@ -94,7 +94,7 @@ fetch_ip()
   _REST=$((_REST-1))
 }
 
-resolve_ip_to_name()
+resolveip()
 {
   _NAME=$(nslookup -query=a "$1" | \
         grep -v canonical | grep name | awk '{print $4}')
@@ -173,15 +173,15 @@ readonly _EMAIL=$1 _CONFIG=/etc/rmspams.conf
 # shellcheck source=/dev/null
 [[ -f ${_CONFIG} ]] && . "${_CONFIG}"
 
-fs_check
-pf_check
+checkfs
+checkpf
 build_full_dir
 
 _REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
 
 for _F in ${_FULL_DIR}/* ; do
-  fetch_ip "${_F}"
-  resolve_ip_to_name "${_IP}"
+  fetchip "${_F}"
+  resolveip "${_IP}"
 done
 
 exit 0
