@@ -21,12 +21,12 @@ set -e
 ## User defined variables: overrides are read from /etc/rmspams.conf  ##
 ########################################################################
 
-MAIL_PATH="/var/mailserver/mail"
+MAIL_PATH=/var/mailserver/mail
 
-PF_TABLE="blacksmtp"
-PF_TABLE_FILE="/etc/blacksmtp"
+PF_TABLE=blacksmtp
+PF_TABLE_FILE=/etc/blacksmtp
 
-WHITE_LIST="/etc/whitesmtp"
+WHITE_LIST=/etc/whitesmtp
 
 ########################################################################
 ## End of user defined variables                                      ##
@@ -163,13 +163,12 @@ done
 shift $((OPTIND - 1))
 (($# != 1)) && usage
 
-_EMAIL=$1
+readonly _EMAIL=$1 _CONFIG=/etc/rmspams.conf
+
 (! echo "${_EMAIL}" | grep -q '^[a-zA-Z0-9._%+-]*@[a-zA-Z0-9]*[\.[a-zA-Z0-9-]*]*[a-zA-Z0-9]$') \
   && rs_err "${0##*/}: bad recipient address"
 
 (($(id -u) != 0)) && rs_err "${0##*/}: need root privileges"
-
-_CONFIG=/etc/rmspams.conf
 
 # shellcheck source=/dev/null
 [[ -f ${_CONFIG} ]] && . "${_CONFIG}"
