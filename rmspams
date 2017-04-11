@@ -57,10 +57,9 @@ syntax_check()
 
 fs_check()
 {
-  local _config _files
+  local _files
 
-  _config=/etc/rmspams.conf
-  _files="${_config} ${WHITE_LIST} ${PF_TABLE_FILE}"
+  _files="${_CONFIG} ${WHITE_LIST} ${PF_TABLE_FILE}"
 
   for _file in ${_files}; do
     if [ -f "${_file}" ]; then
@@ -69,12 +68,9 @@ fs_check()
         rs_err "doas chmod 0600 ${_file}"
       fi
     else
-  	  [[ "${_file}" != "${_config}" ]] && rs_err "${_file} missing"
+      [[ "${_file}" != "${_CONFIG}" ]] && rs_err "${_file} missing"
     fi
   done
-
-  # shellcheck source=/dev/null
-  [[ -f ${_config} ]] && . "${_config}"
 }
 
 pf_check()
@@ -93,9 +89,10 @@ build_full_dir()
 {
   local _domainf _userf _spamf
 
-	_domainf=${_EMAIL#*@}
-	_userf=${_EMAIL%@*}
-	_spamf=".Spam/cur"
+  _domainf=${_EMAIL#*@}
+  _userf=${_EMAIL%@*}
+  _spamf=".Spam/cur"
+
   _FULL_DIR="${MAIL_PATH}/${_domainf}/${_userf}/${_spamf}"
 
   [[ ! -d "${_FULL_DIR}" ]] && rs_err "${_FULL_DIR} doesn't exist"
@@ -110,7 +107,7 @@ fetch_ip()
   _REST=$((_REST-1))
 }
 
-lookup_ip()
+resolve_ip_to_name()
 {
   _NAME=$(nslookup -query=a "$1" | \
         grep -v canonical | grep name | awk '{print $4}')
@@ -164,6 +161,10 @@ your_choice()
 
 _NARG=$#
 _EMAIL=$1
+_CONFIG=/etc/rmspams.conf
+
+# shellcheck source=/dev/null
+[[ -f ${_CONFIG} ]] && . "${_CONFIG}"
 
 syntax_check
 fs_check
@@ -174,7 +175,7 @@ _REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
 
 for _F in ${_FULL_DIR}/* ; do
   fetch_ip "${_F}"
-  lookup_ip "${_IP}"
+  resolve_ip_to_name "${_IP}"
 done
 
 exit 0
