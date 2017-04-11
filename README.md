@@ -16,7 +16,8 @@ The only thing you need is Packet-Filter.</p>
 <footer>
 <b>TODO</b>
 <ul>
-<li>Move files whitesmtp, blacksmtp, rmspams.conf in /etc/rmspams ??</li>
+<li>Move files whitesmtp, blacksmtp, rmspams.conf in the good folder</li>
+<li>Use _rmspams for unprivileged actions</li>
 <li>Make man page for rmspams(8), and rmspams.conf(5)</li>
 <li>Build a Makefile to port the project into OpenBSD</li>
 </ul>
