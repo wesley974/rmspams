@@ -115,14 +115,18 @@ lookup_ip()
   _NAME=$(nslookup -query=a "$1" | \
         grep -v canonical | grep name | awk '{print $4}')
 
-  [[ -z ${_NAME} ]] && _NAME='unknown.'
+  [[ -z ${_NAME} ]] && _NAME='unknown.' 
+
+  echo "${_IP} = ${_NAME} -- Remaining : ${_REST} \c"
+
   [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]] && check_white_list
+  [[ ${_NAME} == "unknown." ]] && echo 'u' && rm -f "${_F}"
 }
 
 find_ip_in_pf()
 {
   if [ -f "${_F}" ]; then
-    (grep -q ^"${_IP}"$ ${PF_TABLE_FILE}) && rm -f "${_F}"
+    (grep -q ^"${_IP}"$ ${PF_TABLE_FILE}) && echo 'b' && rm -f "${_F}"
     (! grep -q ^"${_IP}"$ ${PF_TABLE_FILE}) && your_choice
   fi
 }
@@ -131,14 +135,11 @@ check_white_list()
 {
   local _whitedns
 
-  echo "${_IP} = ${_NAME} -- Remaining : ${_REST}"
-
   if [ ! -s ${WHITE_LIST} ]; then
     find_ip_in_pf
   else
     while read -r _whitedns ; do
-      echo "${_whitedns}"
-      (echo ${_NAME} | grep -q "${_whitedns}$") && rm -f "${_F}" && break
+      (echo ${_NAME} | grep -q "${_whitedns}$") && echo 'w' && rm -f "${_F}" && break
     done < ${WHITE_LIST}
     find_ip_in_pf
   fi
@@ -148,12 +149,13 @@ add_and_load_to_pf()
 {
   echo "${_IP}" >> ${PF_TABLE_FILE}
   /sbin/pfctl -t ${PF_TABLE} -T add "${_IP}"
+  /sbin/pfctl -f /etc/pf.conf
   rm -f "${_F}"
 }
 
 your_choice()
 {
-  echo "Add this IP to blacklist ? (y|n or q to exit) \c"
+  printf "\n\tAdd this IP to blacklist ? (y|n or q to exit)"
   read -r _ans < /dev/tty
   [[ "${_ans}" == "q" ]] && exit 0
   [[ "${_ans}" != "y" && "${_ans}" != "n" ]] && your_choice
