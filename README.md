@@ -13,6 +13,7 @@ The only thing you need is Packet-Filter.</p>
 <footer>
 <b>TODO</b>
 <ul>
+<li>Implement [-d] option for debugging</li>
 <li>Implement [-i] option for interactive</li>
 <li>Implement [-u] default option for unattended running (like a cron job)</li>
 <li>Move files whitesmtp, blacksmtp, rmspams.conf in /etc/rmspams ??</li>
