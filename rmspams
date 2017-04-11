@@ -137,7 +137,8 @@ check_white_list()
     find_ip_in_pf
   else
     while read -r _whitedns ; do
-      (echo ${_NAME} | grep -q "${_whitedns}$") && rm -f "${_F}"
+      echo "${_whitedns}"
+      (echo ${_NAME} | grep -q "${_whitedns}$") && rm -f "${_F}" && break
     done < ${WHITE_LIST}
     find_ip_in_pf
   fi
