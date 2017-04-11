@@ -152,7 +152,8 @@ add_and_load_to_pf()
 
 your_choice()
 {
-  printf "\n\tAdd this IP to blacklist ? (y|n or q to exit)"
+  local _ans
+  echo "\n\tAdd this IP to blacklist ? (y|n or q to exit) \c"
   read -r _ans < /dev/tty
   [[ "${_ans}" == "q" ]] && exit 0
   [[ "${_ans}" != "y" && "${_ans}" != "n" ]] && your_choice
