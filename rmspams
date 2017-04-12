@@ -163,7 +163,7 @@ done
 shift $((OPTIND - 1))
 (($# != 1)) && usage
 
-readonly _EMAIL=$1 _CONFIG=/etc/rmspams.conf
+readonly _EMAIL=$1 _CONFIG=/etc/mail/rmspams.conf
 
 (! echo "${_EMAIL}" | grep -q '^[a-zA-Z0-9._%+-]*@[a-zA-Z0-9]*[\.[a-zA-Z0-9-]*]*[a-zA-Z0-9]$') \
   && rs_err "${0##*/}: bad recipient address"
