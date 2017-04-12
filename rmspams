@@ -38,6 +38,18 @@ usage()
   rs_err "Usage: ${0##*/} [-d] email"
 }
 
+loadconfig()
+{
+  local _var _value
+
+  if [ -f "${_CONFIG}" ]; then
+    while IFS="=" read -r _var _value ; do
+      [[ ${_var} == "MAIL_PATH" ]] && MAIL_PATH=${_value}
+      [[ ${_var} == "WHITE_LIST" ]] && WHITE_LIST=${_value}
+    done < "${_CONFIG}"
+  fi
+}
+
 checkfs()
 {
     if [ -f "${WHITE_LIST}" ]; then
@@ -78,7 +90,11 @@ build_full_dir()
   _userf=${_EMAIL%@*}
   _spamf=".Spam/cur"
 
-  _FULL_DIR="${MAIL_PATH}/${_domainf}/${_userf}/${_spamf}"
+  if [ "${MAIL_PATH}" == "/" ]; then
+    _FULL_DIR="/${_domainf}/${_userf}/${_spamf}"
+  else
+    _FULL_DIR="${MAIL_PATH}/${_domainf}/${_userf}/${_spamf}"
+  fi
 
   [[ ! -d "${_FULL_DIR}" ]] && rs_err "${_FULL_DIR} doesn't exist"
   [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
@@ -108,7 +124,7 @@ resolveip()
 find_ip_in_pf()
 {
   if [ -f "${_F}" ]; then
-    if (/sbin/pfctl -qt${PF_TABLE} -Ttest ${_IP}); then
+    if (/sbin/pfctl -qt${PF_TABLE} -Ttest "${_IP}"); then
       echo '(b)'
       rm -f "${_F}"
     else
@@ -121,12 +137,12 @@ check_white_list()
 {
   local _whitedns
 
-  if [ ! -s ${WHITE_LIST} ]; then
+  if [ ! -s "${WHITE_LIST}" ]; then
     find_ip_in_pf
   else
     while read -r _whitedns ; do
       (echo ${_NAME} | grep -q "${_whitedns}$") && echo '(w)' && rm -f "${_F}" && break
-    done < ${WHITE_LIST}
+    done < "${WHITE_LIST}"
     find_ip_in_pf
   fi
 }
@@ -156,9 +172,7 @@ readonly _EMAIL=$1 _CONFIG=/etc/mail/rmspams.conf
 
 (($(id -u) != 0)) && rs_err "${0##*/}: need root privileges"
 
-# shellcheck source=/dev/null
-[[ -f ${_CONFIG} ]] && . "${_CONFIG}"
-
+loadconfig
 checkfs
 checkpf
 build_full_dir
