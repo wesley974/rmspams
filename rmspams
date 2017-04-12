@@ -24,9 +24,9 @@ set -e
 MAIL_PATH=/var/mailserver/mail
 
 PF_TABLE=blacksmtp
-PF_TABLE_FILE=/etc/blacksmtp
+PF_TABLE_FILE=/var/db/rmspams/blacksmtp
 
-WHITE_LIST=/etc/whitesmtp
+WHITE_LIST=/etc/mail/whitesmtp
 
 ########################################################################
 ## End of user defined variables                                      ##
