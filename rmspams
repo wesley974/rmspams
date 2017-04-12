@@ -35,7 +35,7 @@ rs_err()
 
 usage()
 {
-  rs_err "Usage: ${0##*/} [-i] [-d] email"
+  rs_err "Usage: ${0##*/} [-d] email"
 }
 
 checkfs()
@@ -102,17 +102,17 @@ resolveip()
   echo "${_IP} = ${_NAME} -- Remaining : ${_REST} \c"
 
   [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]] && check_white_list
-  [[ ${_NAME} == "unknown." ]] && echo 'u' && rm -f "${_F}"
+  [[ ${_NAME} == "unknown." ]] && echo '(u)' && rm -f "${_F}"
 }
 
 find_ip_in_pf()
 {
   if [ -f "${_F}" ]; then
-    (grep -q ^"${_IP}"$ ${PF_TABLE_FILE}) && echo '(b)' && rm -f "${_F}"
-    if [ "${_I}" == 0 ]; then
-      (! grep -q ^"${_IP}"$ ${PF_TABLE_FILE}) && echo '' && interactive
+    if (grep -q ^"${_IP}"$ ${PF_TABLE_FILE}); then
+      echo '(b)'
+      rm -f "${_F}"
     else
-      echo '(i)'
+      add_and_load_to_pf
     fi
   fi
 }
@@ -133,28 +133,16 @@ check_white_list()
 
 add_and_load_to_pf()
 {
+  echo "(a)"
   echo "${_IP}" >> ${PF_TABLE_FILE}
   /sbin/pfctl -qt ${PF_TABLE} -T add "${_IP}"
   /sbin/pfctl -f /etc/pf.conf
   rm -f "${_F}"
 }
 
-interactive()
-{
-  local _ans
-  echo "Add this IP to blacklist ? (y|n or q to exit) \c"
-  read -r _ans < /dev/tty
-  [[ "${_ans}" == "q" ]] && exit 0
-  [[ "${_ans}" != "y" && "${_ans}" != "n" ]] && interactive
-  [[ "${_ans}" == "y" ]] && add_and_load_to_pf
-  [[ "${_ans}" == "n" ]] && rm -f "${_F}"
-}
-
-_I=1 # by default no interactive
-while getopts :di opt; do
+while getopts :d opt; do
   case ${opt} in
     d) set -x;;
-    i) _I=0;;
     *) usage;;
   esac
 done
