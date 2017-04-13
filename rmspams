@@ -101,26 +101,26 @@ build_full_dir()
 
 fetchip()
 {
-	local _private _loopback
+	local _private
 	_private="(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)"
-	_loopback="(^127\.0)"
 
-	_IP=$(sed -E -n "/^Received: from/{ s/.*\[//; s/].*//; /${_loopback}|${_private}/!p; }" "${1}")
-
+	_IP=$(sed -En "/^Received: from/{ s/.*\[//; s/].*//; /${_private}/!p; }" "${1}")
   _REST=$((_REST-1))
 }
 
 resolveip()
 {
-  _NAME=$(nslookup -query=a "$1" | \
-        grep -v canonical | grep name | awk '{print $4}')
+  _NAME=$(nslookup -query=a "$1" | sed -n '/name/{ s/.*\=[[:blank:]]//p; }')
 
   [[ -z ${_NAME} ]] && _NAME='unknown.' 
 
   echo "${_IP} = ${_NAME} -- Remaining : ${_REST} \c"
 
-  [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]] && check_white_list
-  [[ ${_NAME} == "unknown." ]] && echo '(u)' && rm -f "${_F}"
+  if [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]]; then
+		check_white_list
+	else
+		echo '(r)' && rm -f "${_F}"
+  fi
 }
 
 find_ip_in_pf()
