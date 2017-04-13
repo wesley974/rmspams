@@ -101,8 +101,11 @@ build_full_dir()
 
 fetchip()
 {
-  _IP=$(grep "^Received: from" "${1}"| sed 's/.*\[//; s/].*//' | \
-    grep -vE '(^127\.0\.0\.1)|(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)')
+	local _private _loopback
+	_private="(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)"
+	_loopback="(^127\.0)"
+
+	_IP=$(sed -E -n "/^Received: from/{ s/.*\[//; s/].*//; /${_loopback}|${_private}/!p; }" "${1}")
 
   _REST=$((_REST-1))
 }
