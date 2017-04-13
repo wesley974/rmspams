@@ -54,8 +54,7 @@ checkfs()
 {
     if [ -f "${WHITE_LIST}" ]; then
       if [ "$(stat -f "%SMp%SLp" "${WHITE_LIST}")" != "------" ]; then
-        echo "Unsecure permissions on ${WHITE_LIST}; please run:"
-        rs_err "doas chmod 0600 ${WHITE_LIST}"
+        rs_err "Unsecure permissions on ${WHITE_LIST}; please run:\ndoas chmod 0600 ${WHITE_LIST}"
       fi
     else
       rs_err "${WHITE_LIST} missing"
