@@ -1,0 +1,69 @@
+.\"	$OpenBSD: rmspams.8,v 1.16 2017/04/14 20:36:50 Exp $
+.\"
+.\" Copyright (c) 2016 Wesley Mouedine Assaby <milo974@gmail.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate: April 14 2017 $
+.Dt RMSPAMS 8
+.Os
+.Sh NAME
+.Nm rmspams
+.Nd remove spams from your junk folder
+.Sh SYNOPSIS
+.Nm rmspams
+.Op Fl dnv
+.Ar email
+.Sh DESCRIPTION
+.Nm rmspams
+is a utility designed to help the administrator block spammers and remove 
+messages from a user junk folder.
+.Pp
+Using with 
+.Fl v 
+option,
+.Nm rmspams
+will provide output with different flags like 
+(w) for white server detected,
+(b) for IP address detected in blacksmtp table, 
+(r) nothing to do with this IP address,
+and (a) for added IP address.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl d
+Run
+.Nm rmspams
+in debug mode.
+.It Fl n
+Don't remove messages and don't populate blacksmtp table.
+.It Fl v
+Produce verbose output.
+.El
+.Sh FILES
+.Bl -tag -width /var/db/rmspams/blacksmtp -compact
+.It Pa /etc/mail/rmspams.conf
+Configuration file
+.It Pa /etc/mail/whitesmtp
+List allowed senders (fqdn)
+.It Pa /var/db/rmspams/blacksmtp
+Filled by 
+.Nm rmspams, 
+list of bocked IP addresses
+.El
+.Sh SEE ALSO
+.Xr rmspams.conf 5
+.Sh AUTHORS
+.Nm rmspams
+was written by
+.An Wesley Mouedine Assaby Aq Mt milo974@gmail.com .
