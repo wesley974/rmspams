@@ -120,7 +120,7 @@ resolveip()
 		check_white_list
 	else
 		verbose "(r)"
-    rm -f "${_F}"
+    removeitem
   fi
 }
 
@@ -129,7 +129,7 @@ find_ip_in_pf()
   if [ -f "${_F}" ]; then
     if (/sbin/pfctl -qt${PF_TABLE} -Ttest "${_IP}"); then
       verbose "(b)"
-      rm -f "${_F}"
+      removeitem
     else
       add_and_load_to_pf
     fi
@@ -138,7 +138,7 @@ find_ip_in_pf()
 
 check_white_list()
 {
-  local _whitedns
+  local _whitedns _findw
 
   if [ ! -s "${WHITE_LIST}" ]; then
     find_ip_in_pf
@@ -146,34 +146,41 @@ check_white_list()
     while read -r _whitedns ; do
       if (echo ${_NAME} | grep -q "${_whitedns}$"); then
         verbose "(w)"
-        rm -f "${_F}"
+        removeitem
+        readonly _findw=1
         break
       fi
     done < "${WHITE_LIST}"
-    find_ip_in_pf
+    [[ -z ${_findw} ]] && find_ip_in_pf
   fi
 }
 
 add_and_load_to_pf()
 {
   verbose "(a)"
-  echo "${_IP}" >> ${PF_TABLE_FILE}
-  /sbin/pfctl -qt ${PF_TABLE} -T add "${_IP}"
-  /sbin/pfctl -f /etc/pf.conf
-  rm -f "${_F}"
+  if [ ! "${_REMOVE}" ]; then
+    echo "${_IP}" >> ${PF_TABLE_FILE}
+    /sbin/pfctl -qt ${PF_TABLE} -T add "${_IP}"
+    /sbin/pfctl -f /etc/pf.conf
+    removeitem
+  fi
 }
 
 verbose()
 {
-  (("${_VERBOSE}" == 1)) && echo "${1}"
+  [[ -n ${_VERBOSE} ]] && echo "${1}"
 }
 
-_VERBOSE=0
+removeitem()
+{
+  [[ ! -n ${_REMOVE} ]] && rm -f "${_F}"
+}
 
-while getopts :dv opt; do
+while getopts :dnv opt; do
   case ${opt} in
     d) set -x;;
-    v) readonly _VERBOSE=1;;
+    n) readonly _REMOVE=0;;
+    v) readonly _VERBOSE=0;;
     *) usage;;
   esac
 done

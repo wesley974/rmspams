@@ -11,6 +11,7 @@ The only thing you need is Packet-Filter.</p>
 <pre><code>rmspams [-d] [-v] email
 <br>
 -d : enable debugging
+-n : don't populate table and don't remove messages
 -v : enable verbose</code></pre>
 </body>
 <footer>
