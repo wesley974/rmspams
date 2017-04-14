@@ -35,7 +35,7 @@ rs_err()
 
 usage()
 {
-  rs_err "Usage: ${0##*/} [-d] email"
+  rs_err "Usage: ${0##*/} [-d] [-v] email"
 }
 
 loadconfig()
@@ -114,12 +114,13 @@ resolveip()
 
   [[ -z ${_NAME} ]] && _NAME='unknown.' 
 
-  echo "${_IP} = ${_NAME} -- Remaining : ${_REST} \c"
+  verbose "${_IP} = ${_NAME} -- Remaining : ${_REST} \c"
 
   if [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]]; then
 		check_white_list
 	else
-		echo '(r)' && rm -f "${_F}"
+		verbose "(r)"
+    rm -f "${_F}"
   fi
 }
 
@@ -127,7 +128,7 @@ find_ip_in_pf()
 {
   if [ -f "${_F}" ]; then
     if (/sbin/pfctl -qt${PF_TABLE} -Ttest "${_IP}"); then
-      echo '(b)'
+      verbose "(b)"
       rm -f "${_F}"
     else
       add_and_load_to_pf
@@ -143,7 +144,11 @@ check_white_list()
     find_ip_in_pf
   else
     while read -r _whitedns ; do
-      (echo ${_NAME} | grep -q "${_whitedns}$") && echo '(w)' && rm -f "${_F}" && break
+      if (echo ${_NAME} | grep -q "${_whitedns}$"); then
+        verbose "(w)"
+        rm -f "${_F}"
+        break
+      fi
     done < "${WHITE_LIST}"
     find_ip_in_pf
   fi
@@ -151,16 +156,24 @@ check_white_list()
 
 add_and_load_to_pf()
 {
-  echo "(a)"
+  verbose "(a)"
   echo "${_IP}" >> ${PF_TABLE_FILE}
   /sbin/pfctl -qt ${PF_TABLE} -T add "${_IP}"
   /sbin/pfctl -f /etc/pf.conf
   rm -f "${_F}"
 }
 
-while getopts :d opt; do
+verbose()
+{
+  (("${_VERBOSE}" == 1)) && echo "${1}"
+}
+
+_VERBOSE=0
+
+while getopts :dv opt; do
   case ${opt} in
     d) set -x;;
+    v) readonly _VERBOSE=1;;
     *) usage;;
   esac
 done
