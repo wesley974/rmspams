@@ -44,8 +44,8 @@ loadconfig()
 
   if [ -f "${_CONFIG}" ]; then
     while IFS="=" read -r _var _value ; do
-      [[ ${_var} == "MAIL_PATH" ]] && MAIL_PATH=${_value}
-      [[ ${_var} == "WHITE_LIST" ]] && WHITE_LIST=${_value}
+      [[ ${_var} == "MAIL_PATH" ]] && readonly MAIL_PATH=${_value}
+      [[ ${_var} == "WHITE_LIST" ]] && readonly WHITE_LIST=${_value}
     done < "${_CONFIG}"
   fi
 }
