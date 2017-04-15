@@ -1,4 +1,4 @@
-.\"	$OpenBSD: rmspams.8,v 1.16 2017/04/14 20:36:50 Exp $
+.\"	$OpenBSD: rmspams.8 2017/04/14 Exp $
 .\"
 .\" Copyright (c) 2016 Wesley Mouedine Assaby <milo974@gmail.com>
 .\"
@@ -22,14 +22,18 @@
 .Nd remove spams from your junk folder
 .Sh SYNOPSIS
 .Nm rmspams
-.Op Fl dnv
+.Op Fl d
+.Op Fl n
+.Op Fl v
 .Ar email
 .Sh DESCRIPTION
 .Nm rmspams
 is a utility designed to help the administrator block spammers and remove 
-messages from a user junk folder.
+messages from a specific user junk folder built from
+.Ar email
+address.
 .Pp
-Using with 
+Only maildir style mailboxes are supported. Using with 
 .Fl v 
 option,
 .Nm rmspams
@@ -46,7 +50,7 @@ Run
 .Nm rmspams
 in debug mode.
 .It Fl n
-Don't remove messages and don't populate blacksmtp table.
+Don't remove messages and don't populate the blacksmtp table.
 .It Fl v
 Produce verbose output.
 .El
