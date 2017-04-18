@@ -51,7 +51,7 @@ parse_config_file()
   readonly MAIL_PATH WHITE_LIST
 }
 
-check_white_list()
+check_white_list_perm()
 {
     if [ -f "${WHITE_LIST}" ]; then
       if [ "$(stat -f "%SMp%SLp" "${WHITE_LIST}")" != "------" ]; then
@@ -196,7 +196,7 @@ readonly _EMAIL=$1 _CONFIG=/etc/mail/rmspams.conf
 (($(id -u) != 0)) && err "${0##*/}: need root privileges"
 
 parse_config_file
-check_white_list
+check_white_list_perm
 check_packet_filter
 build_full_dir
 
