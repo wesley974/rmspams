@@ -105,7 +105,7 @@ fetchip()
 	local _private
 	_private="(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)"
 
-	_IP=$(sed -En "/^Received: from/{ s/.*\[//; s/].*//; /${_private}/!p; }" "${1}")
+	_IP=$(sed -En "/^Received: from.*\[/{ s/.*\[//; s/\].*//; /${_private}/!p; }" "${1}")
   _REST=$((_REST-1))
 }
 
