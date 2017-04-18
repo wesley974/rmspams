@@ -29,7 +29,7 @@
 .Sh DESCRIPTION
 .Nm rmspams
 is a utility designed to help the administrator block spammers and remove 
-messages from a specific user junk folder built from
+messages from a specific user junk folder built from the user
 .Ar email
 address.
 .Pp
@@ -39,7 +39,7 @@ option,
 .Nm rmspams
 will provide output with different flags like 
 (w) for white server detected,
-(b) for IP address detected in blacksmtp table, 
+(b) for IP address detected in the blacksmtp table, 
 (r) nothing to do with this IP address,
 and (a) for added IP address.
 .Pp
@@ -57,7 +57,8 @@ Produce verbose output.
 .Sh FILES
 .Bl -tag -width /var/db/rmspams/blacksmtp -compact
 .It Pa /etc/mail/rmspams.conf
-Configuration file
+Configuration file for
+.Nm rmspams
 .It Pa /etc/mail/whitesmtp
 List allowed senders (fqdn)
 .It Pa /var/db/rmspams/blacksmtp
