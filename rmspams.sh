@@ -145,7 +145,7 @@ check_white_list()
     find_ip_in_table
   else
     while read -r _whitedns ; do
-      if (echo ${_NAME} | grep -q "${_whitedns}$"); then
+      if (echo ${_NAME} | grep -q "${_whitedns}\.$"); then
         verbose "(w)"
         removeitem
         readonly _findw=1
