@@ -28,17 +28,17 @@ WHITE_LIST=/etc/mail/whitesmtp
 ## End of user defined variables                                      ##
 ########################################################################
 
-rs_err()
+err()
 {
-  echo "${1}" 1>&2 && return "${2:-1}"
+  echo "${1}" >&2 && return "${2:-1}"
 }
 
 usage()
 {
-  rs_err "Usage: ${0##*/} [-d] [-n] [-v] email"
+  err "Usage: ${0##*/} [-d] [-n] [-v] email"
 }
 
-loadconfig()
+parse_config_file()
 {
   local _var _value
 
@@ -51,18 +51,18 @@ loadconfig()
   readonly MAIL_PATH WHITE_LIST
 }
 
-checkfs()
+check_white_list()
 {
     if [ -f "${WHITE_LIST}" ]; then
       if [ "$(stat -f "%SMp%SLp" "${WHITE_LIST}")" != "------" ]; then
-        rs_err "Unsecure permissions on ${WHITE_LIST}; please run:\ndoas chmod 0600 ${WHITE_LIST}"
+        err "Unsecure permissions on ${WHITE_LIST}; please run:\ndoas chmod 0600 ${WHITE_LIST}"
       fi
     else
-      rs_err "${WHITE_LIST} missing"
+      err "${WHITE_LIST} missing"
     fi
 }
 
-checkpf()
+check_packet_filter()
 {
   PF_TABLE=blacksmtp
   PF_TABLE_FILE=/var/db/rmspams/blacksmtp
@@ -79,7 +79,7 @@ checkpf()
   _nbf=$( (wc -l) < ${PF_TABLE_FILE} )
   _nbt=$(/sbin/pfctl -qt${PF_TABLE} -Tshow | wc -l)
 
-  (("${_nbf}" != "${_nbt}")) && rs_err "Inconsistency between table and file"
+  (("${_nbf}" != "${_nbt}")) && err "Inconsistency between table and file"
 }
 
 build_full_dir()
@@ -96,7 +96,7 @@ build_full_dir()
     _FULL_DIR="${MAIL_PATH}/${_domainf}/${_userf}/${_spamf}"
   fi
 
-  [[ ! -d "${_FULL_DIR}" ]] && rs_err "${_FULL_DIR} doesn't exist"
+  [[ ! -d "${_FULL_DIR}" ]] && err "${_FULL_DIR} doesn't exist"
   [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
 }
 
@@ -125,7 +125,7 @@ resolveip()
   fi
 }
 
-find_ip_in_pf()
+find_ip_in_table()
 {
   if [ -f "${_F}" ]; then
     if (/sbin/pfctl -qt${PF_TABLE} -Ttest "${_IP}"); then
@@ -142,7 +142,7 @@ check_white_list()
   local _whitedns _findw
 
   if [ ! -s "${WHITE_LIST}" ]; then
-    find_ip_in_pf
+    find_ip_in_table
   else
     while read -r _whitedns ; do
       if (echo ${_NAME} | grep -q "${_whitedns}$"); then
@@ -152,7 +152,7 @@ check_white_list()
         break
       fi
     done < "${WHITE_LIST}"
-    [[ -z ${_findw} ]] && find_ip_in_pf
+    [[ -z ${_findw} ]] && find_ip_in_table
   fi
 }
 
@@ -191,13 +191,13 @@ shift $((OPTIND - 1))
 readonly _EMAIL=$1 _CONFIG=/etc/mail/rmspams.conf
 
 (! echo "${_EMAIL}" | grep -q '^[a-zA-Z0-9._%+-]*@[a-zA-Z0-9]*[\.[a-zA-Z0-9-]*]*[a-zA-Z0-9]$') \
-  && rs_err "${0##*/}: bad recipient address"
+  && err "${0##*/}: bad recipient address"
 
-(($(id -u) != 0)) && rs_err "${0##*/}: need root privileges"
+(($(id -u) != 0)) && err "${0##*/}: need root privileges"
 
-loadconfig
-checkfs
-checkpf
+parse_config_file
+check_white_list
+check_packet_filter
 build_full_dir
 
 _REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
