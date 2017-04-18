@@ -115,7 +115,7 @@ resolveip()
 
   [[ -z ${_NAME} ]] && _NAME='unknown.' 
 
-  verbose "${_IP} = ${_NAME} -- Remaining : ${_REST} \c"
+  verbose "${_IP} = ${_NAME} -- remaining: ${_REST} \c"
 
   if [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]]; then
 		check_white_list
