@@ -1,0 +1,34 @@
+.Dd $Mdocdate: April 15 2017 $
+.Dt RMSPAMS.CONF 5
+.Os
+.Sh NAME
+.Nm rmspams.conf
+.Nd rmspams variables to set
+.Sh DESCRIPTION
+.Nm rmspams.conf
+contains a list of
+.Xr rmspams 8
+variable assignments.
+.Pp
+The file is made up of
+.Xr rmspams 8
+variable assignments
+.Pq Ar variable Ns = Ns Ar value
+with comments designated by a hash mark
+.Pq Sq # .
+.Sh FILES
+.Bl -tag -width /etc/mail/rmspams.conf -compact
+.It Pa /etc/mail/rmspams.conf
+.El
+.Sh EXAMPLES
+Set he maildir path:
+.Bd -literal -offset indent
+MAIL_PATH=/var/mailserver/datas
+.Ed
+.Pp
+Set the whitesmtp file path:
+.Bd -literal -offset indent
+WHITE_LIST=/etc/whitesmtp
+.Ed
+.Sh SEE ALSO
+.Xr rmspams 8
