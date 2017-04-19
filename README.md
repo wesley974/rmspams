@@ -5,7 +5,7 @@
 </head>
 <body>
 <b>Usage</b>
-<pre><code>rmspams [-d] [-n] [-v] email
+<pre><code>rmspams [-dnv] email
 <br>
 -d : enable debugging
 -n : don't populate table and don't remove messages
