@@ -1,4 +1,4 @@
-.\"	$OpenBSD: rmspams.8 2017/04/14 Exp $
+.\"    $OpenBSD: rmspams.8 2017/04/14 Exp $
 .\"
 .\" Copyright (c) 2016 Wesley Mouedine Assaby <milo974@gmail.com>
 .\"
@@ -19,56 +19,66 @@
 .Os
 .Sh NAME
 .Nm rmspams
-.Nd remove spams from your junk folder
+.Nd remove spams from a junk folder
 .Sh SYNOPSIS
 .Nm rmspams
-.Op Fl d
-.Op Fl n
-.Op Fl v
+.Op Fl dnv
 .Ar email
 .Sh DESCRIPTION
-.Nm rmspams
-is a utility designed to help the administrator block spammers and remove 
-messages from a specific user junk folder built from the user
+For each message in the junk folder of the user with the given
 .Ar email
-address.
+address,
+.Nm
+adds the names of mail servers whose IP addresses are found
+in Received: headers to the
+.Pa blacksmtp
+table, except those that are listed in
+.Pa whitesmtp ,
+and deletes each successfully processed message from the junk folder.
 .Pp
-Only maildir style mailboxes are supported. Using with 
-.Fl v 
-option,
-.Nm rmspams
-will provide output with different flags like 
-(w) for white server detected,
-(b) for IP address detected in the blacksmtp table, 
-(r) nothing to do with this IP address,
-and (a) for added IP address.
+Only maildir style mailboxes are supported.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
 .It Fl d
-Run
-.Nm rmspams
-in debug mode.
+Debug mode: use the
+.Xr ksh 1
+.Fl x
+option.
 .It Fl n
-Don't remove messages and don't populate the blacksmtp table.
+Dry run: don't remove messages and don't populate the
+.Pa blacksmtp
+table.
 .It Fl v
-Produce verbose output.
+Produce verbose output, using the following shorthands:
+.Bl -tag -width 3n -compact
+.It Pq a
+Adding the server to
+.Pa blacksmtp .
+.It Pq b
+The server is already listed in
+.Pa blacksmtp .
+.It Pq r
+Nothing to do with this IP address.
+.It Pq w
+The server was found in
+.Pa whitesmtp .
+.El
 .El
 .Sh FILES
 .Bl -tag -width /var/db/rmspams/blacksmtp -compact
 .It Pa /etc/mail/rmspams.conf
 Configuration file for
-.Nm rmspams
+.Nm
 .It Pa /etc/mail/whitesmtp
-List allowed senders (fqdn)
+Allowed senders (FQDN)
 .It Pa /var/db/rmspams/blacksmtp
-Filled by 
-.Nm rmspams, 
-list of bocked IP addresses
+Blocked IP addresses, filled by
+.Nm
 .El
 .Sh SEE ALSO
 .Xr rmspams.conf 5
 .Sh AUTHORS
-.Nm rmspams
+.Nm
 was written by
 .An Wesley Mouedine Assaby Aq Mt milo974@gmail.com .
