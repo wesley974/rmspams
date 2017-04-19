@@ -4,8 +4,6 @@
 <p>Remove spams from a junk folder</p>
 </head>
 <body>
-<b>Installation</b>
-<pre><code>Just run ./install.sh</code></pre>
 <b>Usage</b>
 <pre><code>rmspams [-d] [-n] [-v] email
 <br>
