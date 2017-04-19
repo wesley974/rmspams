@@ -1,8 +1,7 @@
 <html>
 <head>
 <h1>rmspams</h1>
-<p>Block spammers IP addresses from your junk folder.<br>
-The only thing you need is Packet-Filter.</p>
+<p>Remove spams from a junk folder</p>
 </head>
 <body>
 <b>Installation</b>
