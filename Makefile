@@ -1,9 +1,17 @@
-MAN=	rmspams.8 rmspams.conf.5
+COMMENT = 		remove spams from a user junk folder and block senders
+CATEGORIES = 	mail
+DISTNAME = 		rmspams
+MAINTAINER = 	Wesley Mouedine Assaby <milo974@gmail.com>
 
-SCRIPT=	rmspams.sh
+# BSD
+PERMIT_PACKAGE_CDROM =	Yes
 
-realinstall:
-	${INSTALL} ${INSTALL_COPY} -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} \
-		${.CURDIR}/${SCRIPT} ${DESTDIR}${BINDIR}/syspatch
+NO_BUILD = Yes
+NO_TEST = Yes
 
-.include <bsd.prog.mk>
+PKG_ARCH = *
+
+install:
+	${INSTALL_PROGRAM} ${FILESDIR}/rmspams.sh ${PREFIX}${BINDIR}/rmspams
+
+.include <bsd.port.mk>
