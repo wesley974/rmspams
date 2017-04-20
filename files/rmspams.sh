@@ -35,7 +35,7 @@ err()
 
 usage()
 {
-  err "Usage: ${0##*/} [-d] [-n] [-v] email"
+  err "Usage: ${0##*/} [-dnv] email"
 }
 
 parse_config_file()
