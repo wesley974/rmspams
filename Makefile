@@ -11,7 +11,7 @@ NO_TEST = Yes
 
 PKG_ARCH = *
 
-install:
+do-install:
 	install -m 0755 files/rmspams.sh /usr/local/sbin/rmspams
 	install -m 0444 files/rmspams.8 /usr/share/man/man8/
 	install -m 0444 files/rmspams.conf.5 /usr/share/man/man5/
