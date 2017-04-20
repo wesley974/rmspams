@@ -12,6 +12,8 @@ NO_TEST = Yes
 PKG_ARCH = *
 
 install:
-	${INSTALL_PROGRAM} ${FILESDIR}/rmspams.sh ${PREFIX}${BINDIR}/rmspams
+	install -m 0755 files/rmspams.sh /usr/local/sbin/rmspams
+	install -m 0444 files/rmspams.8 /usr/share/man/man8/
+	install -m 0444 files/rmspams.conf.5 /usr/share/man/man5/
 
 .include <bsd.port.mk>
