@@ -102,22 +102,26 @@ build_full_dir()
 
 fetchip()
 {
-	local _private
-	_private="(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)"
-
-	_IP=$(sed -En "/^Received: from.*\[/{ s/.*\[//; s/\].*//; /${_private}/!p; }" "${1}")
+	_IP=$(sed -En "/^Received: from.*\[/{ s/.*\[//; s/\].*//p; q; }" "${1}")
   _REST=$((_REST-1))
 }
 
 resolveip()
 {
-  _NAME=$(nslookup -query=a "$1" | sed -n '/name/{ s/.*\=[[:blank:]]//p; }')
+	local _private
+	_private="(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)"
+
+  if (echo "${_IP}" | grep -Eq "${_private}"); then
+    _NAME='private.'
+  else
+    _NAME=$(nslookup -query=a "$1" | sed -n '/name/{ s/.*\=[[:blank:]]//p; }')
+  fi
 
   [[ -z ${_NAME} ]] && _NAME='unknown.' 
 
   verbose "${_IP} = ${_NAME} -- remaining: ${_REST} \c"
 
-  if [[ ${_NAME} != "localhost." && ${_NAME} != "unknown." ]]; then
+  if (! echo "${_NAME}" | grep -Eq "(^private)|(^localhost)|(^unknown)\.$"); then
 		check_white_list
 	else
 		verbose "(r)"
@@ -128,7 +132,7 @@ resolveip()
 find_ip_in_table()
 {
   if [ -f "${_F}" ]; then
-    if (/sbin/pfctl -qt${PF_TABLE} -Ttest "${_IP}"); then
+    if (/sbin/pfctl -qt"${PF_TABLE}" -Ttest "${_IP}"); then
       verbose "(b)"
       removeitem
     else
