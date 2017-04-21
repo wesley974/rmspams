@@ -1,5 +1,5 @@
 COMMENT = remove spams from a user junk folder and block senders
-CATEGORIES = 	mail
+CATEGORIES = mail
 DISTNAME = rmspams
 MAINTAINER = Wesley Mouedine Assaby <milo974@gmail.com>
 
