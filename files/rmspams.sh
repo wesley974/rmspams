@@ -13,6 +13,7 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
 
 set -e
 
@@ -21,7 +22,7 @@ set -e
 ## User defined variables: overrides are read from /etc/rmspams.conf  ##
 ########################################################################
 
-MAIL_PATH=/var/mailserver/mail
+MAILDIR_PATH=/var/mailserver/mail
 WHITE_LIST=/etc/mail/whitesmtp
 
 ########################################################################
@@ -42,24 +43,24 @@ parse_config_file()
 {
   local _var _value
 
-  if [ -f "${_CONFIG}" ]; then
+  if [[ -f ${_CONFIG} ]]; then
     while IFS="=" read -r _var _value ; do
-      [[ ${_var} == "MAIL_PATH" ]] && MAIL_PATH=${_value}
+      [[ ${_var} == "MAILDIR_PATH" ]] && MAILDIR_PATH=${_value}
       [[ ${_var} == "WHITE_LIST" ]] && WHITE_LIST=${_value}
     done < "${_CONFIG}"
   fi
-  readonly MAIL_PATH WHITE_LIST
+  readonly MAILDIR_PATH WHITE_LIST
 }
 
 check_white_list_perm()
 {
-    if [ -f "${WHITE_LIST}" ]; then
-      if [ "$(stat -f "%SMp%SLp" "${WHITE_LIST}")" != "------" ]; then
-        err "Unsecure permissions on ${WHITE_LIST}; please run:\ndoas chmod 0600 ${WHITE_LIST}"
-      fi
-    else
-      err "${WHITE_LIST} missing"
+  if [[ -f ${WHITE_LIST} ]]; then
+    if [[ $(stat -f "%SMp%SLp" "${WHITE_LIST}") != "------" ]]; then
+      err "Unsecure permissions on ${WHITE_LIST}; please run:\ndoas chmod 0600 ${WHITE_LIST}"
     fi
+  else
+    err "${WHITE_LIST} missing"
+  fi
 }
 
 check_packet_filter()
@@ -68,8 +69,8 @@ check_packet_filter()
   PF_TABLE_FILE=/var/db/rmspams/blacksmtp
 
   /sbin/pfctl -qt ${PF_TABLE} -T add
-  if [ ! -f "${PF_TABLE_FILE}" ]; then
-    mkdir -p /var/db/rmspams 
+  if [[ ! -f ${PF_TABLE_FILE} ]]; then
+    mkdir -p /var/db/rmspams
     touch ${PF_TABLE_FILE}
     chmod 0600 ${PF_TABLE_FILE}
   fi
@@ -90,26 +91,26 @@ build_full_dir()
   _userf=${_EMAIL%@*}
   _spamf=".Spam/cur"
 
-  if [ "${MAIL_PATH}" == "/" ]; then
+  if [[ ${MAILDIR_PATH} == "/" ]]; then
     _FULL_DIR="/${_domainf}/${_userf}/${_spamf}"
   else
-    _FULL_DIR="${MAIL_PATH}/${_domainf}/${_userf}/${_spamf}"
+    _FULL_DIR="${MAILDIR_PATH}/${_domainf}/${_userf}/${_spamf}"
   fi
 
-  [[ ! -d "${_FULL_DIR}" ]] && err "${_FULL_DIR} doesn't exist"
+  [[ ! -d ${_FULL_DIR} ]] && err "${_FULL_DIR} doesn't exist"
   [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
 }
 
 fetchip()
 {
-	_IP=$(sed -En "/^Received: from.*\[/{ s/.*\[//; s/\].*//p; q; }" "${1}")
+  _IP=$(sed -En "/^Received: from.*\[/{ s/.*\[//; s/\].*//p; q; }" "${1}")
   _REST=$((_REST-1))
 }
 
 resolveip()
 {
-	local _private
-	_private="(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)"
+  local _private
+  _private="(^192\.168)|(^10\.)|(^172\.1[6-9])|(^172\.2[0-9])|(^172\.3[0-1])|(^local$)"
 
   if (echo "${_IP}" | grep -Eq "${_private}"); then
     _NAME='private.'
@@ -122,16 +123,16 @@ resolveip()
   verbose "${_IP} = ${_NAME} -- remaining: ${_REST} \c"
 
   if (! echo "${_NAME}" | grep -Eq "(^private)|(^localhost)|(^unknown)\.$"); then
-		check_white_list
-	else
-		verbose "(r)"
+    check_white_list
+  else
+    verbose "(r)"
     removeitem
   fi
 }
 
 find_ip_in_table()
 {
-  if [ -f "${_F}" ]; then
+  if [[ -f ${_F} ]]; then
     if (/sbin/pfctl -qt"${PF_TABLE}" -Ttest "${_IP}"); then
       verbose "(b)"
       removeitem
@@ -145,18 +146,18 @@ check_white_list()
 {
   local _whitedns _findw
 
-  if [ ! -s "${WHITE_LIST}" ]; then
+  if [[ ! -s ${WHITE_LIST} ]]; then
     find_ip_in_table
   else
     while read -r _whitedns ; do
-      if (echo ${_NAME} | grep -q "${_whitedns}\.$"); then
-        verbose "(w)"
-        removeitem
-        readonly _findw=1
-        break
-      fi
-    done < "${WHITE_LIST}"
-    [[ -z ${_findw} ]] && find_ip_in_table
+    if (echo ${_NAME} | grep -q "${_whitedns}\.$"); then
+      verbose "(w)"
+      removeitem
+      readonly _findw=1
+      break
+    fi
+  done < "${WHITE_LIST}"
+  [[ -z ${_findw} ]] && find_ip_in_table
   fi
 }
 
@@ -183,10 +184,10 @@ removeitem()
 
 while getopts :dnv opt; do
   case ${opt} in
-    d) set -x;;
-    n) readonly _REMOVE=0;;
-    v) readonly _VERBOSE=0;;
-    *) usage;;
+  d) set -x;;
+  n) readonly _REMOVE=0;;
+  v) readonly _VERBOSE=0;;
+  *) usage;;
   esac
 done
 shift $((OPTIND - 1))
