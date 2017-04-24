@@ -1,19 +1,10 @@
-COMMENT = remove spams from a user junk folder and block senders
-CATEGORIES = mail
-DISTNAME = rmspams
-MAINTAINER = Wesley Mouedine Assaby <milo974@gmail.com>
-
-# BSD
-PERMIT_PACKAGE_CDROM = Yes
-
-NO_BUILD = Yes
-NO_TEST = Yes
-
-PKG_ARCH = *
+PREFIX ?= /usr/local
 
 do-install:
 	install -m 0755 files/rmspams.sh ${PREFIX}/sbin/rmspams
-	install -m 0444 files/rmspams.8 /usr/share/man/man8/
-	install -m 0444 files/rmspams.conf.5 /usr/share/man/man5/
+	install -m 0444 files/rmspams.8 ${PREFIX}/man/man8/
+	install -m 0444 files/rmspams.conf.5 ${PREFIX}/man/man5/
+	install -d -m 0755 ${PREFIX}/examples/rmspams/
+	install -m 0444 examples/* ${PREFIX}/examples/rmspams/
 
-.include <bsd.port.mk>
+.MAIN: do-install
