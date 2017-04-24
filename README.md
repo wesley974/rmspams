@@ -7,9 +7,9 @@
 <b>Usage</b>
 <pre><code>rmspams [-dnv] email
 <br>
--d : enable debugging
--n : don't populate table and don't remove messages
--v : enable verbose</code></pre>
+-d : Debug mode
+-n : Dry run
+-v : Verbose</code></pre>
 </body>
 <footer>
 If you like the project and if you wish updates, support it adding a star (★).
