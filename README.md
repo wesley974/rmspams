@@ -4,7 +4,7 @@
 <p>Remove spams from a junk folder.</p>
 </head>
 <body>
-<b>Installation</b>
+<b>Install</b>
 <pre><code>doas make</code></pre>
 <b>Uninstall</b>
 <pre><code>doas make clean</code></pre>
