@@ -1,9 +1,13 @@
 <html>
 <head>
 <h1>rmspams</h1>
-<p>Remove spams from a junk folder</p>
+<p>Remove spams from a junk folder.</p>
 </head>
 <body>
+<b>Installation</b>
+<pre><code>doas make</code></pre>
+<b>Uninstall</b>
+<pre><code>doas make clean</code></pre>
 <b>Usage</b>
 <pre><code>rmspams [-dnv] email
 <br>
