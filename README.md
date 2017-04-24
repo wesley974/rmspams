@@ -12,11 +12,6 @@
 -v : enable verbose</code></pre>
 </body>
 <footer>
-<b>TODO</b>
-<ul>
-<li>Build a Makefile to port the project into OpenBSD</li>
-</ul>
-
 If you like the project and if you wish updates, support it adding a star (★).
 </footer>
 </html>
