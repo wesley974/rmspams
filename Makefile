@@ -10,7 +10,7 @@ do-install:
 clean:
 	rm -f ${PREFIX}/sbin/rmspams
 	rm -f ${PREFIX}/man/man8/rmspams.8
-	rm -f ${PREFIX}/man/man5/rmspams.conf
+	rm -f ${PREFIX}/man/man5/rmspams.conf.5
 	rm -rf ${PREFIX}/share/examples/rmspams
 
 .MAIN: do-install
