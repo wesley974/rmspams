@@ -56,7 +56,7 @@ check_white_list_perm()
 {
   if [[ -f ${WHITE_LIST} ]]; then
     if [[ $(stat -f "%SMp%SLp" "${WHITE_LIST}") != "------" ]]; then
-      err "Unsecure permissions on ${WHITE_LIST}; please run:\ndoas chmod 0600 ${WHITE_LIST}"
+      err "Please run:\ndoas chmod 0600 ${WHITE_LIST}"
     fi
   else
     err "${WHITE_LIST} missing"
