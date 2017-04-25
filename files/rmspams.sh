@@ -77,7 +77,7 @@ check_packet_filter()
 
   local _nbf _nbt
 
-  _nbf=$(wc -l < ${_PF_TABLE_FILE})
+  _nbf=$(wc -l ${_PF_TABLE_FILE})
   _nbt=$(/sbin/pfctl -qt${_PF_TABLE} -Tshow | wc -l)
 
   (("${_nbf}" != "${_nbt}")) && err "Inconsistency between table and file"
