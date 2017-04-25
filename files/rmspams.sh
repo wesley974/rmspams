@@ -65,20 +65,20 @@ check_white_list_perm()
 
 check_packet_filter()
 {
-  PF_TABLE=blacksmtp
-  PF_TABLE_FILE=/var/db/rmspams/blacksmtp
+  readonly _PF_TABLE=blacksmtp
+  readonly _PF_TABLE_FILE=/var/db/rmspams/blacksmtp
 
-  /sbin/pfctl -qt ${PF_TABLE} -T add
-  if [[ ! -f ${PF_TABLE_FILE} ]]; then
+  /sbin/pfctl -qt ${_PF_TABLE} -T add
+  if [[ ! -f ${_PF_TABLE_FILE} ]]; then
     mkdir -p /var/db/rmspams
-    touch ${PF_TABLE_FILE}
-    chmod 0600 ${PF_TABLE_FILE}
+    touch ${_PF_TABLE_FILE}
+    chmod 0600 ${_PF_TABLE_FILE}
   fi
 
   local _nbf _nbt
 
-  _nbf=$( (wc -l) < ${PF_TABLE_FILE} )
-  _nbt=$(/sbin/pfctl -qt${PF_TABLE} -Tshow | wc -l)
+  _nbf=$( (wc -l) < ${_PF_TABLE_FILE} )
+  _nbt=$(/sbin/pfctl -qt${_PF_TABLE} -Tshow | wc -l)
 
   (("${_nbf}" != "${_nbt}")) && err "Inconsistency between table and file"
 }
@@ -133,7 +133,7 @@ resolveip()
 find_ip_in_table()
 {
   if [[ -f ${_F} ]]; then
-    if (/sbin/pfctl -qt"${PF_TABLE}" -Ttest "${_IP}"); then
+    if (/sbin/pfctl -qt"${_PF_TABLE}" -Ttest "${_IP}"); then
       verbose "(b)"
       removeitem
     else
@@ -165,8 +165,8 @@ add_to_pf()
 {
   verbose "(a)"
   if [ ! "${_REMOVE}" ]; then
-    echo "${_IP}" >> ${PF_TABLE_FILE}
-    /sbin/pfctl -qt ${PF_TABLE} -T add "${_IP}"
+    echo "${_IP}" >> ${_PF_TABLE_FILE}
+    /sbin/pfctl -qt ${_PF_TABLE} -T add "${_IP}"
     removeitem
   fi
 }
