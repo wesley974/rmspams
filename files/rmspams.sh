@@ -54,12 +54,10 @@ parse_config_file()
 
 check_white_list_perm()
 {
-  if [[ -f ${WHITE_LIST} ]]; then
-    if [[ $(stat -f "%SMp%SLp" "${WHITE_LIST}") != "------" ]]; then
+  [[ -f ${WHITE_LIST} ]] || err "${WHITE_LIST} missing"
+
+  if [[ $(stat -f "%SMp%SLp" "${WHITE_LIST}") != "------" ]]; then
       err "Please run:\ndoas chmod 0600 ${WHITE_LIST}"
-    fi
-  else
-    err "${WHITE_LIST} missing"
   fi
 }
 
@@ -77,7 +75,7 @@ check_packet_filter()
 
   local _nbf _nbt
 
-  _nbf=$(wc -l ${_PF_TABLE_FILE})
+  _nbf=$(wc -l < ${_PF_TABLE_FILE})
   _nbt=$(/sbin/pfctl -qt${_PF_TABLE} -Tshow | wc -l)
 
   (("${_nbf}" != "${_nbt}")) && err "Inconsistency between table and file"
@@ -97,7 +95,7 @@ build_full_dir()
     _FULL_DIR="${MAILDIR_PATH}/${_domainf}/${_userf}/${_spamf}"
   fi
 
-  [[ ! -d ${_FULL_DIR} ]] && err "${_FULL_DIR} doesn't exist"
+  [[ -d ${_FULL_DIR} ]] || err "${_FULL_DIR} doesn't exist"
 
   _REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
   [ ${_REST} == 0 ] && exit 0
@@ -125,7 +123,7 @@ resolveip()
   verbose "${_IP} = ${_NAME} -- remaining: ${_REST} \c"
 
   if (! echo "${_NAME}" | grep -Eq "(^private)|(^localhost)|(^unknown)\.$"); then
-    check_white_list
+    parse_white_list
   else
     verbose "(r)"
     removeitem
@@ -144,7 +142,7 @@ find_ip_in_table()
   fi
 }
 
-check_white_list()
+parse_white_list()
 {
   local _whitedns _findw
 
@@ -180,7 +178,7 @@ verbose()
 
 removeitem()
 {
-  [[ ! -n ${_REMOVE} ]] && rm -f "${_F}"
+  [[ -n ${_REMOVE} ]] || rm -f "${_F}"
 }
 
 while getopts :dnv opt; do
