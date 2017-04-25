@@ -68,7 +68,7 @@ check_packet_filter()
 
   /sbin/pfctl -qt ${_PF_TABLE} -T add
   if [[ ! -f ${_PF_TABLE_FILE} ]]; then
-    mkdir -p /var/db/rmspams
+    mkdir -p ${_PF_TABLE_FILE%/*}
     touch ${_PF_TABLE_FILE}
     chmod 0600 ${_PF_TABLE_FILE}
   fi
@@ -78,7 +78,7 @@ check_packet_filter()
   _nbf=$(wc -l < ${_PF_TABLE_FILE})
   _nbt=$(/sbin/pfctl -qt${_PF_TABLE} -Tshow | wc -l)
 
-  (("${_nbf}" != "${_nbt}")) && err "Inconsistency between table and file"
+  ((_nbf != _nbt)) && err "Inconsistency between table and file"
 }
 
 build_full_dir()
