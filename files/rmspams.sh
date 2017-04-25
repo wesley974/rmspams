@@ -77,7 +77,7 @@ check_packet_filter()
 
   local _nbf _nbt
 
-  _nbf=$( (wc -l) < ${_PF_TABLE_FILE} )
+  _nbf=$(wc -l < ${_PF_TABLE_FILE})
   _nbt=$(/sbin/pfctl -qt${_PF_TABLE} -Tshow | wc -l)
 
   (("${_nbf}" != "${_nbt}")) && err "Inconsistency between table and file"
@@ -98,7 +98,9 @@ build_full_dir()
   fi
 
   [[ ! -d ${_FULL_DIR} ]] && err "${_FULL_DIR} doesn't exist"
-  [ "$(find "${_FULL_DIR}" -mindepth 1)" ] || exit 0
+
+  _REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
+  [ ${_REST} == 0 ] && exit 0
 }
 
 fetchip()
@@ -203,8 +205,6 @@ parse_config_file
 check_white_list_perm
 check_packet_filter
 build_full_dir
-
-_REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
 
 for _F in ${_FULL_DIR}/* ; do
   fetchip "${_F}"
