@@ -104,7 +104,7 @@ build_full_dir()
 fetchip()
 {
   _IP=$(sed -En "/^Received: from.*\[/{ s/.*\[//; s/\].*//p; q; }" "${1}")
-  _REST=$((_REST-1))
+  : $((_REST--))
 }
 
 resolveip()
@@ -122,7 +122,7 @@ resolveip()
 
   verbose "${_IP} = ${_NAME} -- remaining: ${_REST} \c"
 
-  if (! echo "${_NAME}" | grep -Eq "(^private)|(^localhost)|(^unknown)\.$"); then
+  if (! echo "${_NAME}" | grep -Eq "(^private|^localhost|^unknown)\.$"); then
     parse_white_list
   else
     verbose "(r)"
