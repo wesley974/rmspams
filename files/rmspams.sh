@@ -98,7 +98,7 @@ build_full_dir()
   [[ -d ${_FULL_DIR} ]] || err "${_FULL_DIR} doesn't exist"
 
   _REST=$(find "${_FULL_DIR}" -maxdepth 1 -type f | wc -l)
-  [ ${_REST} == 0 ] && exit 0
+  (( _REST == 0 )) && exit 0
 }
 
 fetchip()
