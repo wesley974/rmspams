@@ -52,13 +52,14 @@ parse_config_file()
   readonly MAILDIR_PATH WHITE_LIST
 }
 
-check_white_list_perm()
+check_perm()
 {
-  [[ -f ${WHITE_LIST} ]] || err "${WHITE_LIST} missing"
+  local _fmode _file=$1
 
-  if [[ $(stat -f "%SMp%SLp" "${WHITE_LIST}") != "------" ]]; then
-      err "Please run:\ndoas chmod 0600 ${WHITE_LIST}"
-  fi
+  [[ -f ${_file} ]] || err "${_file} missing"
+
+  eval "$(stat -f _fmode=%OMp%OLp "${_file}")"
+  [[ ${_fmode} !=  0600 ]] && err "Please run: doas chmod 0600 ${_file}"
 }
 
 check_packet_filter()
@@ -200,7 +201,8 @@ readonly _EMAIL=$1 _CONFIG=/etc/mail/rmspams.conf
 (($(id -u) != 0)) && err "${0##*/}: need root privileges"
 
 parse_config_file
-check_white_list_perm
+check_perm ${_CONFIG}
+check_perm "${WHITE_LIST}"
 check_packet_filter
 build_full_dir
 
