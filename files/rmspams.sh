@@ -62,7 +62,7 @@ check_perm()
 
   [[ -f ${_file} ]] || err "${_file} missing"
 
-  eval "$(stat -f _fmode=%OMp%OLp "${_file}")"
+  eval "$(/usr/bin/stat -f _fmode=%OMp%OLp "${_file}")"
   [[ ${_fmode} !=  0600 ]] && err "Please run: doas chmod 0600 ${_file}"
 }
 
